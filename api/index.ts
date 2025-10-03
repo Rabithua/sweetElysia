@@ -1,6 +1,6 @@
 import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";
-import { geminiRoutes } from "./routes/chat";
+import { geminiRoutes } from "./routes/chat.js";
 
 const app = new Elysia()
   .use(openapi())

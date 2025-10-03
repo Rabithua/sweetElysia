@@ -1,7 +1,7 @@
 import { Elysia, sse, t } from "elysia";
 import OpenAI from "openai";
-import { ZGEN_PROMPT } from "../constants/chat";
-import { ChatModel } from "../models/chat";
+import { ZGEN_PROMPT } from "../constants/chat.js";
+import { ChatModel } from "../models/chat.js";
 
 let openai: OpenAI;
 
