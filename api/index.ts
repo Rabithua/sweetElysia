@@ -1,10 +1,7 @@
 import openapi from "@elysiajs/openapi";
 import { Elysia } from "elysia";
+import { geminiRoutes } from "./routes/chat";
 
-export default new Elysia()
-  .use(openapi())
-  .get("/", ({ set, status }) => {
-    set.headers["x-powered-by"] = "Elysia";
-    return status(200, "hello elysia");
-  })
-  .compile();
+const app = new Elysia().use(openapi()).use(geminiRoutes);
+
+export default app;

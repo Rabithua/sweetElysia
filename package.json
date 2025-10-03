@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@elysiajs/openapi": "^1.4.11",
-    "elysia": "latest"
+    "elysia": "latest",
+    "openai": "^6.1.0"
   },
   "devDependencies": {
     "bun-types": "latest",
