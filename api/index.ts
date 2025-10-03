@@ -15,6 +15,6 @@ export default new Elysia()
   )
   .get("/", ({ set, status }) => {
     set.headers["x-powered-by"] = "Elysia";
-    return status(418, "I'm a teapot");
+    return status(200, "hello elysia");
   })
   .compile();
