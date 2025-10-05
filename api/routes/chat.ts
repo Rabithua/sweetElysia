@@ -1,6 +1,6 @@
 import { Elysia, sse, t } from "elysia";
 import OpenAI from "openai";
-import { ZGEN_PROMPT } from "../constants/chat.js";
+import { GEMINI_MODEL, ZGEN_PROMPT } from "../constants/chat.js";
 import { ChatModel } from "../models/chat.js";
 
 let openai: OpenAI;
@@ -24,7 +24,7 @@ export const geminiRoutes = new Elysia({
     "/completions",
     async ({ query: { prompt } }) => {
       return await openai.chat.completions.create({
-        model: "gemini-2.0-flash",
+        model: GEMINI_MODEL,
         messages: [
           {
             role: "system",
@@ -46,19 +46,46 @@ export const geminiRoutes = new Elysia({
   .post(
     "/completions/stream",
     async function* ({ body }) {
-      const stream = await openai.chat.completions.create({
-        model: "gemini-2.0-flash",
-        messages: [
-          {
-            role: "system",
-            content: ZGEN_PROMPT,
-          },
-          ...body.messages,
-        ],
-        stream: true,
-      });
-      for await (const event of stream) {
-        yield sse(event.choices[0]?.delta.content || "done");
+      try {
+        const stream = await openai.chat.completions.create({
+          model: GEMINI_MODEL,
+          messages: [
+            { role: "system", content: ZGEN_PROMPT },
+            ...body.messages,
+          ],
+          stream: true,
+        });
+
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content;
+
+          if (content) {
+            // JSON.stringify 会自动转义特殊字符
+            yield sse(
+              JSON.stringify({
+                content: content,
+                type: "chunk",
+              })
+            );
+          }
+
+          if (chunk.choices[0]?.finish_reason) {
+            yield sse(
+              JSON.stringify({
+                type: "done",
+                finish_reason: chunk.choices[0].finish_reason,
+              })
+            );
+            break;
+          }
+        }
+      } catch (error) {
+        yield sse(
+          JSON.stringify({
+            type: "error",
+            error: error instanceof Error ? error.message : "Unknown error",
+          })
+        );
       }
     },
     {
@@ -71,7 +98,7 @@ export const geminiRoutes = new Elysia({
     "/completions",
     async ({ body }) => {
       return await openai.chat.completions.create({
-        model: "gemini-2.0-flash",
+        model: GEMINI_MODEL,
         messages: [
           {
             role: "system",
